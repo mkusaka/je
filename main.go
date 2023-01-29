@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -13,19 +16,46 @@ type str struct {
 	V string `json:"v,omitempty"`
 }
 
+var version string
+
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Usage: je <arg>")
+	showVersion := flag.Bool("version", false, "prints the version number")
+	flag.Parse()
+
+	if *showVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
+
+	var r io.Reader
+
+	var in string
+	if len(os.Args) >= 2 {
+		in = os.Args[1]
+	}
+
+	switch in {
+	case "":
+		r = os.Stdin
+	case "-":
+		r = os.Stdin
+	default:
+		r = bytes.NewBufferString(in)
+	}
+
+	b, err := io.ReadAll(r)
+
+	if err != nil {
+		fmt.Println(errors.WithStack(err))
 		os.Exit(1)
 	}
 
-	in := os.Args[1]
-	fmt.Println("in", in)
+	inputString := string(b)
 
-	hoge := str{
-		V: in,
+	inputStruct := str{
+		V: inputString,
 	}
-	out, err := json.Marshal(hoge)
+	out, err := json.Marshal(inputStruct)
 	if err != nil {
 		fmt.Println(errors.WithStack(err))
 		os.Exit(1)
