@@ -53,3 +53,6 @@ from stdin
 ```bash
 echo <input> | ./je
 ```
+
+## alternatives
+- `jq -n -r --arg param "$param" '$param'` might be what we wanted.
